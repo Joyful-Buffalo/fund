@@ -1,0 +1,4 @@
+interface:
+  display_name: "基金研究"
+  short_description: "用于 fund 项目的基金、ETF、指数和本地笔记研究。"
+  default_prompt: "处理基金、ETF、指数、配置、费用、申购限额和本地基金知识库任务时，使用 fund-research。"

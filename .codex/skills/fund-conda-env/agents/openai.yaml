@@ -1,0 +1,4 @@
+interface:
+  display_name: "fund 项目运行环境"
+  short_description: "在 fund 项目中强制使用 jijin conda 环境运行代码。"
+  default_prompt: "在 fund 项目运行 Python、测试、脚本或数据处理命令时，使用 fund-conda-env。"

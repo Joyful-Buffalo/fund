@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+python "skills/sh-dividend-50-total-return/scripts/fetch_sh_dividend_50_total_return.py"
+python "skills/csi-dividend-100-total-return/scripts/fetch_csi_dividend_100_total_return.py"
+python "skills/central-soe-dividend-50-total-return/scripts/fetch_central_soe_dividend_50_total_return.py"
+python "skills/state-owned-enterprise-dividend-100-total-return/scripts/fetch_state_owned_enterprise_dividend_100_total_return.py"
+python "skills/hk-connect-central-soe-dividend-48-total-return/scripts/fetch_hk_connect_central_soe_dividend_48_total_return.py"
+python "skills/consumer-dividend-50-total-return/scripts/fetch_consumer_dividend_50_total_return.py"
+python "skills/leading-dividend-50-total-return/scripts/fetch_leading_dividend_50_total_return.py"
+python "skills/dividend-quality-50-total-return/scripts/fetch_dividend_quality_50_total_return.py"
+python "skills/hk-dividend-30-total-return/scripts/fetch_hk_dividend_30_total_return.py"
+python "skills/csi-dividend-low-volatility-50-total-return/scripts/fetch_csi_dividend_low_volatility_50_total_return.py"
+python "skills/csi-dividend-low-volatility-100-total-return/scripts/fetch_csi_dividend_low_volatility_100_total_return.py"
+python "skills/csi-hksh-dividend-growth-low-volatility-100-total-return/scripts/fetch_csi_hksh_dividend_growth_low_volatility_100_total_return.py"
+python "skills/csi-free-cash-flow-100-total-return/scripts/fetch_csi_free_cash_flow_100_total_return.py"
+python "skills/cni-free-cash-flow-100-total-return/scripts/fetch_cni_free_cash_flow_100_total_return.py"

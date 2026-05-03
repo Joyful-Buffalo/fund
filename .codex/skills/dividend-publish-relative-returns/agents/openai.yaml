@@ -1,0 +1,4 @@
+interface:
+  display_name: "红利发布时间相对收益"
+  short_description: "按发布时间归零并排序生成红利指数相对收益曲线和统计。"
+  default_prompt: "使用 $dividend-publish-relative-returns 绘制15个红利指数按发布时间归零的全收益相对收益图。"

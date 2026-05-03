@@ -1,0 +1,4 @@
+interface:
+  display_name: "纳斯达克100研究"
+  short_description: "用于纳斯达克100指数、基金、收益和本地笔记研究。"
+  default_prompt: "处理纳斯达克100指数、ETF、QDII、杠杆ETF、收益和本地纳指100笔记任务时，使用 nasdaq100-research。"

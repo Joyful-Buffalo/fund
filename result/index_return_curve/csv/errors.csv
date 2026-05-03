@@ -1,0 +1,6 @@
+﻿name,code,error
+恒生红利低波动指数（50）,HSHYLV,"全部候选接口失败:
+hk:HSHYLVDV -> KeyError: 'HSHYLVDV'
+em_direct:124.HSHYLVDV -> ValueError: 东方财富无数据: secid=124.HSHYLVDV, response={'rc': 100, 'rt': 1, 'svr': 177617930, 'lt': 1, 'full': 1, 'dlmkts': '', 'data': None}
+hk:HSHYLVN -> KeyError: 'HSHYLVN'
+em_direct:124.HSHYLVN -> ValueError: 东方财富无数据: secid=124.HSHYLVN, response={'rc': 100, 'rt': 1, 'svr': 177617936, 'lt': 1, 'full': 1, 'dlmkts': '', 'data': None}"
