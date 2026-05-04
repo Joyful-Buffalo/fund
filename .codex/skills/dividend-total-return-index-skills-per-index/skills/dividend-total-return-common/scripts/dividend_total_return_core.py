@@ -161,6 +161,14 @@ def parse_date_series(values) -> pd.Series:
         return pd.to_datetime(values, errors="coerce")
 
 
+def item_history_start_date(item: dict[str, Any]) -> pd.Timestamp:
+    raw = item.get("history_start_date", START_DATE)
+    parsed = pd.to_datetime(raw, errors="coerce")
+    if pd.isna(parsed):
+        parsed = pd.to_datetime(START_DATE)
+    return pd.Timestamp(parsed)
+
+
 def api_date(value: str) -> str:
     parsed = pd.to_datetime(value, errors="coerce")
     if pd.isna(parsed):
@@ -556,7 +564,7 @@ def normalize_daily(raw: pd.DataFrame, item: dict[str, Any], source: str, symbol
     if amount_col:
         df["amount"] = pd.to_numeric(raw[amount_col], errors="coerce")
 
-    start = pd.to_datetime(START_DATE)
+    start = item_history_start_date(item)
     end = pd.to_datetime(END_DATE)
     df = df[(df["date"] >= start) & (df["date"] <= end)]
     df = df.dropna(subset=["date", "close"])

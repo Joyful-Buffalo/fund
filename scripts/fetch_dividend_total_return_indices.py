@@ -121,6 +121,13 @@ INDEXES = [
         ],
     },
     {
+        "name": "国新港股通央企红利指数",
+        "code": "931722",
+        "candidates": [
+            ("csindex", "931722HKD210"),
+        ],
+    },
+    {
         "name": "消费红利指数（50）",
         "code": "H30094",
         "candidates": [
@@ -148,6 +155,14 @@ INDEXES = [
         "code": "930914",
         "candidates": [
             ("rising99", "H20914"),
+            ("csindex", "H20914"),
+        ],
+    },
+    {
+        "name": "港股通高股息",
+        "code": "930914",
+        "history_start_date": "2014-11-14",
+        "candidates": [
             ("csindex", "H20914"),
         ],
     },
@@ -265,6 +280,14 @@ def parse_date_series(values) -> pd.Series:
         return pd.to_datetime(values, errors="coerce", format="mixed")
     except TypeError:
         return pd.to_datetime(values, errors="coerce")
+
+
+def item_history_start_date(item: dict) -> pd.Timestamp:
+    raw = item.get("history_start_date", START_DATE)
+    parsed = pd.to_datetime(raw, errors="coerce")
+    if pd.isna(parsed):
+        parsed = pd.to_datetime(START_DATE)
+    return pd.Timestamp(parsed)
 
 
 def api_date(value: str) -> str:
@@ -802,7 +825,7 @@ def normalize_daily(raw: pd.DataFrame, item: dict, source: str, symbol: str) -> 
     if amount_col:
         df["amount"] = pd.to_numeric(raw[amount_col], errors="coerce")
 
-    start = pd.to_datetime(START_DATE)
+    start = item_history_start_date(item)
     end = pd.to_datetime(END_DATE)
 
     df = df[(df["date"] >= start) & (df["date"] <= end)]
@@ -917,6 +940,7 @@ def load_cache(item: dict) -> pd.DataFrame | None:
     df["close"] = pd.to_numeric(df["close"], errors="coerce")
     df = df.dropna(subset=["date", "close"])
     df = df[df["close"] > 0]
+    df = df[df["date"] >= item_history_start_date(item)]
     df = df.sort_values("date").drop_duplicates("date")
 
     if len(df) < 2:

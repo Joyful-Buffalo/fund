@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-按每个红利指数的发布时间作为锚点，绘制 15 个红利指数全收益相对收益曲线。
+按每个红利指数的发布时间作为锚点，绘制红利指数全收益相对收益曲线。
 
 口径：
 - 每张图选择一个主指数，横轴从该主指数的发布时间开始。
@@ -36,6 +36,7 @@ REPO_DIR = SCRIPT_DIR.parent
 
 DEFAULT_REFERENCE_MD = REPO_DIR / "fund" / "红利指数" / "earning.md"
 DEFAULT_SKILL_DAILY_ROOT = REPO_DIR / "result" / "dividend_total_return_index_skills"
+DEFAULT_EXCLUDED_NAMES = {"消费红利指数（50）"}
 DEFAULT_DAILY_DIRS = [
     REPO_DIR / "result" / "index_return_curve" / "csv",
     REPO_DIR / "result" / "dividend_total_return_indices" / "csv",
@@ -142,6 +143,14 @@ def sort_by_publish_date(rows: list[dict[str, object]]) -> list[dict[str, object
             enumerate(rows),
             key=lambda item: (pd.Timestamp(item[1]["reference_publish_date"]), item[0]),
         )
+    ]
+
+
+def filter_reference_rows(rows: list[dict[str, object]], excluded_names: set[str]) -> list[dict[str, object]]:
+    return [
+        row
+        for row in rows
+        if normalize_name(row["name"]) not in excluded_names
     ]
 
 
@@ -604,7 +613,9 @@ def main() -> None:
 
     set_chinese_font()
 
-    reference_rows = sort_by_publish_date(parse_markdown_table(args.reference_md))
+    reference_rows = sort_by_publish_date(
+        filter_reference_rows(parse_markdown_table(args.reference_md), DEFAULT_EXCLUDED_NAMES)
+    )
     series_map = load_all_series(reference_rows, daily_dirs, args.skill_daily_root)
     long_df, summary_df = build_relative_dataset(reference_rows, series_map)
     write_outputs(reference_rows, long_df, summary_df, args.out_dir)

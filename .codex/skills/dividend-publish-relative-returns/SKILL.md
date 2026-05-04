@@ -1,6 +1,6 @@
 ---
 name: dividend-publish-relative-returns
-description: 在 fund 项目绘制、更新或核对 15 个红利指数/基金“按发布时间归零”的全收益相对收益曲线时使用。适用于用户要求按主指数发布时间生成图片、按最终收益排序图例、按主指数发布时间排序输出图片、统计各指数自其发布时间或主发布时间起的收益，而不是用指数基准日或更早历史归零。
+description: 在 fund 项目绘制、更新或核对红利指数/基金“按发布时间归零”的全收益相对收益曲线时使用。适用于用户要求按主指数发布时间生成图片、按最终收益排序图例、按主指数发布时间排序输出图片、统计各指数自其发布时间或主发布时间起的收益，而不是用指数基准日或更早历史归零。
 ---
 
 # 红利发布时间相对收益图
@@ -22,6 +22,7 @@ conda run -n jijin python scripts/plot_publish_relative_returns.py
 - 旧版日线目录：`result/index_return_curve/csv`，其次 `result/dividend_total_return_indices/csv`
 - 同一指数存在多个日线源时，选择 `last_date` 最新的源；日期相同则优先单指数 skill 输出
 - 恒生红利低波动拟合曲线：`result/hsi_hshylv_total_return_fit/csv/hshylv_fitted_total_return_daily.csv`
+- 默认排除：`消费红利指数（50）`
 
 脚本默认输出：
 
@@ -88,8 +89,8 @@ conda run -n jijin python -c "import pandas as pd; s=pd.read_csv('result/publish
 
 期望：
 
-- 图片数量为 15。
-- 汇总表为 15 x 15，即 225 行数据。
+- 图片数量等于参与 publish 的主指数数量。
+- 汇总表为 N x N 行数据，N 为参与 publish 的指数数量。
 - 主图顺序按 `main_publish_date` 升序。
 - 抽样检查早期主指数时，晚发布指数从自己的发布时间归零；已发布指数从主指数发布时间归零。例如中证红利作为主指数时，上证红利和中证红利都从 `2008-05-26` 归零，龙头红利从 `2021-12-17` 归零。
 
