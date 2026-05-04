@@ -18,7 +18,9 @@ conda run -n jijin python scripts/plot_publish_relative_returns.py
 脚本默认读取：
 
 - 发布时间表：`fund/红利指数/earning.md`
-- 日线目录：`result/index_return_curve/csv`，其次 `result/dividend_total_return_indices/csv`
+- 单指数 skill 输出：`result/dividend_total_return_index_skills`
+- 旧版日线目录：`result/index_return_curve/csv`，其次 `result/dividend_total_return_indices/csv`
+- 同一指数存在多个日线源时，选择 `last_date` 最新的源；日期相同则优先单指数 skill 输出
 - 恒生红利低波动拟合曲线：`result/hsi_hshylv_total_return_fit/csv/hshylv_fitted_total_return_daily.csv`
 
 脚本默认输出：

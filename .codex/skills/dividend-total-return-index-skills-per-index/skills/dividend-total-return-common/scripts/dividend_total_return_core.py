@@ -46,7 +46,7 @@ from matplotlib import font_manager
 
 START_DATE = "20000101"
 END_DATE = pd.Timestamp.today().strftime("%Y%m%d")
-CACHE_VERSION = "2026-05-03-per-index-total-return-skill-v2"
+CACHE_VERSION = "2026-05-04-per-index-total-return-skill-csindex-date-v3"
 REQUEST_TIMEOUT = 15
 RETRY_TIMES = 1
 SLEEP_SECONDS = 1
@@ -166,6 +166,13 @@ def api_date(value: str) -> str:
     if pd.isna(parsed):
         return value
     return parsed.strftime("%Y-%m-%d")
+
+
+def csindex_api_date(value: str) -> str:
+    parsed = pd.to_datetime(value, errors="coerce")
+    if pd.isna(parsed):
+        return value.replace("-", "")
+    return parsed.strftime("%Y%m%d")
 
 
 def pick_col(df: pd.DataFrame, names: list[str]) -> str:
@@ -414,11 +421,11 @@ def fetch_csindex_payload(symbol: str, start_date: str, end_date: str) -> list[d
 
 def fetch_csindex_direct(symbol: str) -> pd.DataFrame:
     parsed_end = pd.to_datetime(END_DATE, errors="coerce")
-    end_dates = [api_date(END_DATE)]
+    end_dates = [csindex_api_date(END_DATE)]
     if not pd.isna(parsed_end):
         for year in range(parsed_end.year - 1, parsed_end.year - 4, -1):
-            end_dates.append(f"{year}-12-31")
-    start_dates = [api_date(START_DATE), "2017-01-01", "2024-01-01"]
+            end_dates.append(f"{year}1231")
+    start_dates = [csindex_api_date(START_DATE), "20170101", "20240101"]
     best_data: list[dict[str, Any]] = []
     for end_date in dict.fromkeys(end_dates):
         for start_date in start_dates:

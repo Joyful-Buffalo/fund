@@ -35,6 +35,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_DIR = SCRIPT_DIR.parent
 
 DEFAULT_REFERENCE_MD = REPO_DIR / "fund" / "红利指数" / "earning.md"
+DEFAULT_SKILL_DAILY_ROOT = REPO_DIR / "result" / "dividend_total_return_index_skills"
 DEFAULT_DAILY_DIRS = [
     REPO_DIR / "result" / "index_return_curve" / "csv",
     REPO_DIR / "result" / "dividend_total_return_indices" / "csv",
@@ -173,7 +174,51 @@ def clean_daily(df: pd.DataFrame, name: str, source_path: Path, data_note: str) 
     return out.reset_index(drop=True)
 
 
-def load_standard_daily(name: str, daily_dirs: list[Path]) -> pd.DataFrame | None:
+def load_per_index_skill_daily_candidates(name: str, skill_daily_root: Path) -> list[pd.DataFrame]:
+    if not skill_daily_root.exists():
+        return []
+
+    candidates = []
+    for summary_path in sorted(skill_daily_root.glob("*/csv/*_summary.csv")):
+        try:
+            summary = pd.read_csv(summary_path)
+        except pd.errors.EmptyDataError:
+            continue
+
+        if summary.empty or "name" not in summary.columns:
+            continue
+        if normalize_name(summary["name"].iloc[0]) != name:
+            continue
+
+        slug = summary_path.name.removesuffix("_summary.csv")
+        daily_path = summary_path.with_name(f"{slug}_daily.csv")
+        if not daily_path.exists():
+            daily_files = sorted(summary_path.parent.glob("*_daily.csv"))
+            if not daily_files:
+                continue
+            daily_path = daily_files[0]
+
+        df = clean_daily(
+            pd.read_csv(daily_path),
+            name=name,
+            source_path=daily_path,
+            data_note="per_index_skill_total_return",
+        )
+        if len(df) >= 2:
+            candidates.append(df)
+
+    return candidates
+
+
+def source_priority(df: pd.DataFrame) -> int:
+    source_path = str(df["source_path"].iloc[0])
+    if "dividend_total_return_index_skills" in source_path:
+        return 1
+    return 0
+
+
+def load_standard_daily(name: str, daily_dirs: list[Path], skill_daily_root: Path) -> pd.DataFrame | None:
+    candidates = load_per_index_skill_daily_candidates(name, skill_daily_root)
     filename = legacy_daily_filename(name)
     for daily_dir in daily_dirs:
         path = daily_dir / filename
@@ -187,9 +232,19 @@ def load_standard_daily(name: str, daily_dirs: list[Path]) -> pd.DataFrame | Non
             data_note="official_or_project_total_return",
         )
         if len(df) >= 2:
-            return df
+            candidates.append(df)
 
-    return None
+    if not candidates:
+        return None
+
+    return max(
+        candidates,
+        key=lambda df: (
+            pd.Timestamp(df["date"].max()),
+            source_priority(df),
+            len(df),
+        ),
+    )
 
 
 def hsi_fit_note() -> str:
@@ -229,13 +284,17 @@ def load_hsi_fit_daily() -> pd.DataFrame:
     )
 
 
-def load_all_series(reference_rows: list[dict[str, object]], daily_dirs: list[Path]) -> dict[str, pd.DataFrame]:
+def load_all_series(
+    reference_rows: list[dict[str, object]],
+    daily_dirs: list[Path],
+    skill_daily_root: Path,
+) -> dict[str, pd.DataFrame]:
     series_map: dict[str, pd.DataFrame] = {}
     missing = []
 
     for row in reference_rows:
         name = str(row["name"])
-        df = load_standard_daily(name, daily_dirs)
+        df = load_standard_daily(name, daily_dirs, skill_daily_root)
 
         if df is None and name == HSI_INDEX_NAME:
             df = load_hsi_fit_daily()
@@ -522,7 +581,13 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         action="append",
         default=None,
-        help="日线 CSV 目录，可重复传入；默认读取 result/index_return_curve/csv 和 result/dividend_total_return_indices/csv",
+        help="旧版日线 CSV 目录，可重复传入；默认读取 result/index_return_curve/csv 和 result/dividend_total_return_indices/csv",
+    )
+    parser.add_argument(
+        "--skill-daily-root",
+        type=Path,
+        default=DEFAULT_SKILL_DAILY_ROOT,
+        help="单指数 skill 输出根目录；默认读取 result/dividend_total_return_index_skills",
     )
     parser.add_argument(
         "--out-dir",
@@ -540,7 +605,7 @@ def main() -> None:
     set_chinese_font()
 
     reference_rows = sort_by_publish_date(parse_markdown_table(args.reference_md))
-    series_map = load_all_series(reference_rows, daily_dirs)
+    series_map = load_all_series(reference_rows, daily_dirs, args.skill_daily_root)
     long_df, summary_df = build_relative_dataset(reference_rows, series_map)
     write_outputs(reference_rows, long_df, summary_df, args.out_dir)
 
